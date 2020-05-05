@@ -40,6 +40,14 @@
  * Test code.
  */
 
+/* car system */
+const char *num_to_direction(int);
+const char *num_to_route(int);
+void calculate_route(int);
+void go_straight(int);
+void turn_right(int);
+void turn_left(int);
+
 /* data structure tests */
 int arraytest(int, char **);
 int bitmaptest(int, char **);

@@ -43,6 +43,16 @@
 #define NCVLOOPS      5
 #define NTHREADS      32
 
+// Define constants values of the direction.
+#define NORTH   1
+#define EAST    2
+#define SOUTH   3
+#define WEST    4
+#define NW      1
+#define NE      2
+#define SE      3
+#define SW      4
+
 static volatile unsigned long testval1;
 static volatile unsigned long testval2;
 static volatile unsigned long testval3;
@@ -50,6 +60,93 @@ static struct semaphore *testsem;
 static struct lock *testlock;
 static struct cv *testcv;
 static struct semaphore *donesem;
+
+// Define the global variable of the information of cars.
+int car_info[32][2];
+int car_route[32][3];
+
+// Change numbers to direction.
+const char
+*num_to_direction(int direction_num)
+{
+        switch(direction_num) {
+                case 1:
+                        return "NORTH";
+                case 2:
+                        return " EAST";
+                case 3:
+                        return "SOUTH";
+                case 4:
+                        return " WEST";
+        }
+        return NULL;
+}
+// Change numbers to route.
+const char
+*num_to_route(int route_num)
+{
+        switch(route_num) {
+                case 1:
+                        return "NW";
+                case 2:
+                        return "NE";
+                case 3:
+                        return "SE";
+                case 4:
+                        return "SW";
+        }
+        return NULL;
+}
+
+// Caculate the route of cars.
+void
+calculate_route(int num_of_car)
+{
+        if(car_info[num_of_car][1]==car_info[num_of_car][0]+2||car_info[num_of_car][1]==car_info[num_of_car][0]-2)
+                go_straight(num_of_car);
+        else if(car_info[num_of_car][1]==car_info[num_of_car][0]+1||car_info[num_of_car][1]==car_info[num_of_car][0]-1)
+                turn_left(num_of_car);
+        else
+                turn_right(num_of_car);
+}
+void
+go_straight(int num_of_car)
+{
+        int i=0;
+        car_route[num_of_car][i]=car_info[num_of_car][0];
+        for(i=1;i<2;i++) {
+                if(car_route[num_of_car][i-1]-1==0)
+                        car_route[num_of_car][i-1]=4;
+                else
+                        car_route[num_of_car][i]=car_route[num_of_car][i-1]-1;
+        }
+        for(int j=0;j<NTHREADS;j++) {
+                car_route[j][i]=0;
+        }
+}
+void
+turn_right(int num_of_car)
+{
+        int i=0;
+        car_route[num_of_car][i]=car_info[num_of_car][0];
+        for(int j=0;j<NTHREADS;j++) {
+                car_route[j][i]=0;
+                car_route[j][i+1]=0;
+        }
+}
+void
+turn_left(int num_of_car)
+{
+        int i=0;
+        car_route[num_of_car][i]=car_info[num_of_car][0];
+        for(i=1;i<3;i++) {
+                if(car_route[num_of_car][i-1]-1==0)
+                        car_route[num_of_car][i]=4;
+                else
+                        car_route[num_of_car][i]=car_route[num_of_car][i-1]-1;
+        }
+}
+
 
 static
 void
@@ -115,13 +212,27 @@ semtest(int nargs, char **args)
 	P(testsem);
 	kprintf("ok\n");
 
+	        kprintf("\n");
+        kprintf("\n***Initial position of cars.***\n");
+        kprintf("-------------------------------------------------------------\n");
+
 	for (i=0; i<NTHREADS; i++) {
 		result = thread_fork("semtest", NULL, semtestthread, NULL, i);
 		if (result) {
 			panic("semtest: thread_fork failed: %s\n",
 			      strerror(result));
 		}
+		// Initialize the poision of cars
+                else {
+                        car_info[i][0]=(random()%4)+1;
+                        car_info[i][1]=(random()%4)+1;
+                        calculate_route(i);
+                        
+			// Print the initial position of cars
+                	kprintf("car number %d| approaching point: %s, target point: %s\n", i, num_to_direction(car_info[i][0]), num_to_direction(car_info[i][1]));
+			}
 	}
+	kprintf("-------------------------------------------------------------\n");
 
 	for (i=0; i<NTHREADS; i++) {
 		V(testsem);
