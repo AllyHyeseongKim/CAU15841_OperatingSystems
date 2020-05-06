@@ -54,6 +54,7 @@
 #define SE      3
 #define SW      4
 
+
 static volatile unsigned long testval1;
 static volatile unsigned long testval2;
 static volatile unsigned long testval3;
@@ -72,6 +73,10 @@ static struct semaphore *SE;
 static struct semaphore *PRINT;
 // Define the semaphore for moving cars.
 static struct semaphore *FINISH;
+
+/* Threads */
+typedef struct thread Thread;
+
 
 // Define the global variable of the information of cars.
 int car_info[32][2];
@@ -164,6 +169,19 @@ static
 void
 inititems(void)
 {
+	// Initialize semaphores
+	if(FINISH==NULL) {
+		NW = sem_create("NW", 1);
+		NE = sem_create("NE", 1);
+		SW = sem_create("SW", 1);
+		SE = sem_create("SE", 1);
+		PRINT = sem_create("PRINT", 1);
+		FINISH = sem_create("FINISH", 3);
+		if(FINISH==NULL) {
+			panic("synchtest: sem_create failed\n");
+		}
+	}
+
 	if (testsem==NULL) {
 		testsem = sem_create("testsem", 2);
 		if (testsem == NULL) {
@@ -206,7 +224,9 @@ semtestthread(void *junk, unsigned long num)
 		kprintf("%c", (int)num+64);
 	}
 	kprintf("\n");
-	V(donesem);
+
+	V(testsem);
+	P(donesem);
 }
 
 int
@@ -221,28 +241,18 @@ semtest(int nargs, char **args)
 	kprintf("Starting semaphore test...\n");
 	kprintf("If this hangs, it's broken: ");
 	kprintf("ok\n");
+	
 
-	        kprintf("\n");
-        kprintf("\n***Initial position of cars.***\n");
-        kprintf("-------------------------------------------------------------\n");
+	cars = (Thread*)kmalloc(sizeof(Thread)*NTHREADS);
+	
 
 	for (i=0; i<NTHREADS; i++) {
-		result = thread_fork("semtest", NULL, semtestthread, NULL, i);
+		result = thread_fork("semtest", NULL, semtestthread, (void*)cars, i);
 		if (result) {
 			panic("semtest: thread_fork failed: %s\n",
 			      strerror(result));
 		}
-		// Initialize the poision of cars
-                else {
-                        car_info[i][0]=(random()%4)+1;
-                        car_info[i][1]=(random()%4)+1;
-                        calculate_route(i);
-                        
-			// Print the initial position of cars
-                	kprintf("car number %d| approaching point: %s, target point: %s\n", i, num_to_direction(car_info[i][0]), num_to_direction(car_info[i][1]));
-			}
 	}
-	kprintf("-------------------------------------------------------------\n");
 
 	for (i=0; i<NTHREADS; i++) {
 		V(testsem);
@@ -252,6 +262,11 @@ semtest(int nargs, char **args)
 	/* so we can run it again */
 //	V(testsem);
 //	V(testsem);
+
+	if (cars!=NULL) {
+		kfree(cars);
+		cars = NULL;
+	}
 
 	kprintf("Semaphore test done.\n");
 	return 0;
