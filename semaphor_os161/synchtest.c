@@ -45,10 +45,6 @@
 #define NTHREADS      32
 
 // Define constants values of the direction.
-#define NORTH   1
-#define EAST    2
-#define SOUTH   3
-#define WEST    4
 #define NW      1
 #define NE      2
 #define SE      3
@@ -70,7 +66,7 @@ static struct semaphore *NE;
 static struct semaphore *SW;
 static struct semaphore *SE;
 // Define the semaphore for printing messages.
-static struct semaphore *PRINT;
+static struct semaphore *KPRINT;
 // Define the semaphore for moving cars.
 static struct semaphore *FINISH;
 
@@ -79,7 +75,7 @@ typedef struct thread Thread;
 
 
 /* Intesection points */
-// Define Intersection points.
+// Define intersection points.
 typedef enum cordinalPoints {
 	NORTH = 0;
 	EAST = 1;
@@ -119,7 +115,7 @@ inititems(void)
 		NE = sem_create("NE", 1);
 		SW = sem_create("SW", 1);
 		SE = sem_create("SE", 1);
-		PRINT = sem_create("PRINT", 1);
+		KPRINT = sem_create("KPRINT", 1);
 		FINISH = sem_create("FINISH", 3);
 		if(FINISH==NULL) {
 			panic("synchtest: sem_create failed\n");
@@ -154,23 +150,32 @@ inititems(void)
 
 static
 void
-semtestthread(void *junk, unsigned long num)
+semtestthread(void *junk, unsigned long car_num)
 {
 	int i;
 	(void)junk;
+
 	// Define start and end points of cars.
 	CardinalPoints start_point;
 	CardinalPoints end_point;
-
+	// Generate two differenct random numbers in 0~3.
+	start_point = random()%4;
+	end_point = random()%4;
+	while (start_point==end_point) {
+		end_point = random()%4;
+	}
+	
+	// Print the approaching point of cars.
+	P(KPRINT);
+	kprintf("--------------------------------------------------------------------\n");
+	kprintf("[approaching] car number: %lu| approaching point: %s, target point: %s", car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+	kprintf("--------------------------------------------------------------------\n");
+	V(KPRINT);
 	/*
 	 * Only one of these should print at a time.
 	 */
-	P(testsem);
-	kprintf("Thread %2lu: ", num);
-	for (i=0; i<NSEMLOOPS; i++) {
-		kprintf("%c", (int)num+64);
-	}
-	kprintf("\n");
+	
+
 
 	V(testsem);
 	P(donesem);
@@ -188,11 +193,12 @@ semtest(int nargs, char **args)
 	kprintf("Starting semaphore test...\n");
 	kprintf("If this hangs, it's broken: ");
 	kprintf("ok\n");
-	
+	kprintf("--------------------------------------------------------------------\n");
+	kprintf("--------------------------------------------------------------------\n");
 
+
+	// Generate car threads
 	cars = (Thread*)kmalloc(sizeof(Thread)*NTHREADS);
-	
-
 	for (i=0; i<NTHREADS; i++) {
 		result = thread_fork("semtest", NULL, semtestthread, (void*)cars, i);
 		if (result) {
@@ -209,7 +215,8 @@ semtest(int nargs, char **args)
 	/* so we can run it again */
 //	V(testsem);
 //	V(testsem);
-
+	
+	// Free threads
 	if (cars!=NULL) {
 		kfree(cars);
 		cars = NULL;
