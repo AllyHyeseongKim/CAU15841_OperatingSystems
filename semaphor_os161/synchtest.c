@@ -211,7 +211,51 @@ turnRight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_po
         V(FINISH);
 }
 // Turn Left.
+void
+turnLeft(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)
+{
+        int route1;
+	int route2
 
+        P(FINISH);
+
+        pCardinalPoint(start_point+4);
+        // Print the current point.
+        P(KPRINT);
+        kprintf("[MOVING %s/TURN LEFT] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", getCardinalPoint(start_point+4), car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+        V(KPRINT);
+
+        route1 = start_point+3
+        if(route1<4)
+                route1 = 7;
+        pCardinalPoint(route1);
+        vCardinalPoint(start_point+4);
+        // Print the current point      
+        P(KPRINT);
+        kprintf("[MOVING %s/TURN LEFT] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", getCardinalPoint(route1), car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+        V(KPRINT);
+	
+	route2 = start_point+2
+        if(route2<4)
+                route2 = start_point+4;
+        pCardinalPoint(route2);
+        vCardinalPoint(route1);
+        // Print the current point      
+        P(KPRINT);
+        kprintf("[MOVING %s/TURN LEFT] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", getCardinalPoint(route2), car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+        V(KPRINT);
+
+        // Print the exiting point of cars.
+        P(KPRINT);
+        kprintf("--------------------------------------------------------------------\n");
+        kprintf("[LEAVING] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+        kprintf("--------------------------------------------------------------------\n");
+        V(KPRINT);
+
+        vCardinalPoint(route2);
+
+        V(FINISH);
+}
 // Moving System
 void
 movingSystem(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)
