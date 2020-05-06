@@ -38,6 +38,7 @@
 #include <synch.h>
 #include <test.h>
 
+
 #define NSEMLOOPS     63
 #define NLOCKLOOPS    120
 #define NCVLOOPS      5
@@ -56,10 +57,21 @@
 static volatile unsigned long testval1;
 static volatile unsigned long testval2;
 static volatile unsigned long testval3;
+
+/* Semaphores */
 static struct semaphore *testsem;
 static struct lock *testlock;
 static struct cv *testcv;
 static struct semaphore *donesem;
+// Define semaphores for intersection points.
+static struct semaphore *NW;
+static struct semaphore *NE;
+static struct semaphore *SW;
+static struct semaphore *SE;
+// Define the semaphore for printing messages.
+static struct semaphore *PRINT;
+// Define the semaphore for moving cars.
+static struct semaphore *FINISH;
 
 // Define the global variable of the information of cars.
 int car_info[32][2];
@@ -208,8 +220,6 @@ semtest(int nargs, char **args)
 	inititems();
 	kprintf("Starting semaphore test...\n");
 	kprintf("If this hangs, it's broken: ");
-	P(testsem);
-	P(testsem);
 	kprintf("ok\n");
 
 	        kprintf("\n");
@@ -240,8 +250,8 @@ semtest(int nargs, char **args)
 	}
 
 	/* so we can run it again */
-	V(testsem);
-	V(testsem);
+//	V(testsem);
+//	V(testsem);
 
 	kprintf("Semaphore test done.\n");
 	return 0;
