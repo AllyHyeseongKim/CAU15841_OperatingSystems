@@ -76,15 +76,15 @@ typedef struct thread Thread;
 
 /* Intesection points */
 // Define intersection points.
-typedef enum cordinalPoints {
+typedef enum cardinalPoint {
 	NORTH = 0;
 	EAST = 1;
 	SOUTH = 2;
 	WEST = 3;
-} CordinalPoints;
+} CardinalPoint;
 // Get intersection points to string.
 const char* 
-getCordinalPoint(enum CordinalPoints point)
+getCardinalPoint(CardinalPoint point)
 {
 	switch(point) {
 		case NORTH:
@@ -97,6 +97,23 @@ getCordinalPoint(enum CordinalPoints point)
 			return " WEST";
 	}
 	return NULL;
+}
+
+
+/* Moving system */
+// Go Straight.
+// Turn Right.
+// Turn Left.
+// Moving System
+void
+movingSystem(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)
+{
+	if (end_point==(start_point+2)||end_point==(start_point-2))
+		goStraight(car_num, start_point, end_point);
+	else if (end_point==(start_point+3)||end_point==(start_point-1))
+		turnRight(car_num, start_point, end_point);
+	else if (end_point==(start_point+1)||end_point==(start_point-3))
+		turnLeft(car_num, start_point, end_point);
 }
 
 
@@ -150,14 +167,14 @@ inititems(void)
 
 static
 void
-semtestthread(void *junk, unsigned long car_num)
+semtestthread(void *cars, unsigned long car_num)
 {
-	int i;
-	(void)junk;
+	// Define the car.
+	Thread *car = (Thread)cars;
 
 	// Define start and end points of cars.
-	CardinalPoints start_point;
-	CardinalPoints end_point;
+	CardinalPoint start_point;
+	CardinalPoint end_point;
 	// Generate two differenct random numbers in 0~3.
 	start_point = random()%4;
 	end_point = random()%4;
@@ -168,14 +185,13 @@ semtestthread(void *junk, unsigned long car_num)
 	// Print the approaching point of cars.
 	P(KPRINT);
 	kprintf("--------------------------------------------------------------------\n");
-	kprintf("[approaching] car number: %lu| approaching point: %s, target point: %s", car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+	kprintf("[APPROACHING] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
 	kprintf("--------------------------------------------------------------------\n");
 	V(KPRINT);
-	/*
-	 * Only one of these should print at a time.
-	 */
 	
-
+	// Move the car with the moving system.
+	movingSystem(car_num, start_point, end_point);
+	car[car_num].t_state = S_ZOMBIE;
 
 	V(testsem);
 	P(donesem);

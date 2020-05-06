@@ -38,9 +38,12 @@
 /*
  * Car system.
  */
-/* intersection Points*/
-const char* getCordinalPoint(enum);
 
+/* intersection Points*/
+const char* getCordinalPoint(CardinalPoint);
+
+/* moving system */
+void movingSystem(unsigned long, CardinalPoint, CardinalPoint);
 
 /*
  * Test code.
