@@ -173,14 +173,45 @@ goStraight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_p
 	vCardinalPoint(start_point+4);
 	// Print the current point	
 	P(KPRINT);
-        kprintf("[MOVING %s/GO STRAIGHT] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", getCardinalPoint(start_point+4), car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+        kprintf("[MOVING %s/GO STRAIGHT] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", getCardinalPoint(route), car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
         V(KPRINT);
+
+        // Print the exiting point of cars.
+        P(KPRINT);
+        kprintf("--------------------------------------------------------------------\n");
+        kprintf("[LEAVING] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+        kprintf("--------------------------------------------------------------------\n");
+        V(KPRINT);
+
 	vCardinalPoint(route);
 	
 	V(FINISH);
 }
 // Turn Right.
+void
+turnRight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)
+{
+        P(FINISH);
+
+        pCardinalPoint(start_point+4);
+        // Print the current point.
+        P(KPRINT);
+        kprintf("[MOVING %s/TURN RIGHT] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", getCardinalPoint(start_point+4), car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+        V(KPRINT);
+
+	// Print the exiting point of cars.
+        P(KPRINT);
+        kprintf("--------------------------------------------------------------------\n");
+        kprintf("[LEAVING] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+        kprintf("--------------------------------------------------------------------\n");
+        V(KPRINT);
+
+        vCardinalPoint(start_point+4);
+
+        V(FINISH);
+}
 // Turn Left.
+
 // Moving System
 void
 movingSystem(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)

@@ -46,6 +46,7 @@ const char* getCordinalPoint(enum CardinalPoint);
 void pCardinalPoint(int);
 void vCardinalPoint(int);
 void goStraight(unsigned long, CardinalPoint, CardinalPoint);
+void turnRight(unsigned long, CardinalPoint, CardinalPoint);
 void movingSystem(unsigned long, CardinalPoint, CardinalPoint);
 
 /*
