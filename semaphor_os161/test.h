@@ -38,9 +38,28 @@
 /*
  * Car system.
  */
-/* intersection Points*/
-const char* getCordinalPoint(enum);
 
+/* intersection Points*/
+// Define intersection points.
+typedef enum cardinalPoint {
+        NORTH = 0,
+        EAST = 1,
+        SOUTH = 2,
+        WEST = 3,
+        NW = 4,
+        NE = 5,
+        SE = 6,
+        SW = 7
+} CardinalPoint;
+const char* getCardinalPoint(CardinalPoint);
+
+/* moving system */
+void pCardinalPoint(int);
+void vCardinalPoint(int);
+void goStraight(unsigned long, CardinalPoint, CardinalPoint);
+void turnRight(unsigned long, CardinalPoint, CardinalPoint);
+void turnLeft(unsigned long, CardinalPoint, CardinalPoint);
+void movingSystem(unsigned long, CardinalPoint, CardinalPoint);
 
 /*
  * Test code.
