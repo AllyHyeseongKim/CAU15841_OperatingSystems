@@ -81,10 +81,14 @@ typedef enum cardinalPoint {
 	EAST = 1;
 	SOUTH = 2;
 	WEST = 3;
+	NW = 4;
+	NE = 5;
+	SE = 6;
+	SW = 7;
 } CardinalPoint;
 // Get intersection points to string.
 const char* 
-getCardinalPoint(CardinalPoint point)
+getCardinalPoint(enum CardinalPoint point)
 {
 	switch(point) {
 		case NORTH:
@@ -95,13 +99,86 @@ getCardinalPoint(CardinalPoint point)
 			return "SOUTH";
 		case WEST:
 			return " WEST";
+		case NW:
+			return "NW";
+		case NE:
+			return "NE";
+		case SE:
+			return "SE";
+		case SW:
+			return "SW";
 	}
 	return NULL;
 }
 
 
 /* Moving system */
+void
+pCardinalPoint(int cardinal_point)
+{
+	switch(cardinal_point) {
+		case 4:
+			P(NW);
+			break;
+		case 5:
+			P(NE);
+			break;
+		case 6:
+			P(SE);
+			break;
+		case 7:
+			P(SW);
+			break;
+
+	}
+}
+void
+vCardinalPoint(int cardinal_point)
+{
+        switch(cardinal_point) {
+                case 4:
+                        V(NW);
+                        break;
+                case 5:
+                        V(NE);
+                        break;
+                case 6:
+                        V(SE);
+                        break;
+                case 7:
+                        V(SW);
+                        break;
+
+        }
+}
+
 // Go Straight.
+void
+goStraight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)
+{
+	int route;
+
+	P(FINISH);
+
+	pCardinalPoint(start_point+4);
+	// Print the current point.
+	P(KPRINT);
+	kprintf("[MOVING %s/GO STRAIGHT] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", getCardinalPoint(start_point+4), car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+	V(KPRINT);
+
+	route = start_point+3
+	if(route<4)
+		route = 7;
+	pCardinalPoint(route);
+	vCardinalPoint(start_point+4);
+	// Print the current point	
+	P(KPRINT);
+        kprintf("[MOVING %s/GO STRAIGHT] CAR NUMBER: %lu| APPROACHING POINT: %s, TARGET POINT: %s", getCardinalPoint(start_point+4), car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
+        V(KPRINT);
+	vCardinalPoint(route);
+	
+	V(FINISH);
+}
 // Turn Right.
 // Turn Left.
 // Moving System

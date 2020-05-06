@@ -40,9 +40,12 @@
  */
 
 /* intersection Points*/
-const char* getCordinalPoint(CardinalPoint);
+const char* getCordinalPoint(enum CardinalPoint);
 
 /* moving system */
+void pCardinalPoint(int);
+void vCardinalPoint(int);
+void goStraight(unsigned long, CardinalPoint, CardinalPoint);
 void movingSystem(unsigned long, CardinalPoint, CardinalPoint);
 
 /*
