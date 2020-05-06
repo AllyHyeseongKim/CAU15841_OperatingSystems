@@ -78,93 +78,37 @@ static struct semaphore *FINISH;
 typedef struct thread Thread;
 
 
-// Define the global variable of the information of cars.
-int car_info[32][2];
-int car_route[32][3];
-
-// Change numbers to direction.
-const char
-*num_to_direction(int direction_num)
+/* Intesection points */
+// Define Intersection points.
+typedef enum cordinalPoints {
+	NORTH = 0;
+	EAST = 1;
+	SOUTH = 2;
+	WEST = 3;
+} CordinalPoints;
+// Get intersection points to string.
+const char* 
+getCordinalPoint(enum CordinalPoints point)
 {
-        switch(direction_num) {
-                case 1:
-                        return "NORTH";
-                case 2:
-                        return " EAST";
-                case 3:
-                        return "SOUTH";
-                case 4:
-                        return " WEST";
-        }
-        return NULL;
-}
-// Change numbers to route.
-const char
-*num_to_route(int route_num)
-{
-        switch(route_num) {
-                case 1:
-                        return "NW";
-                case 2:
-                        return "NE";
-                case 3:
-                        return "SE";
-                case 4:
-                        return "SW";
-        }
-        return NULL;
-}
-
-// Caculate the route of cars.
-void
-calculate_route(int num_of_car)
-{
-        if(car_info[num_of_car][1]==car_info[num_of_car][0]+2||car_info[num_of_car][1]==car_info[num_of_car][0]-2)
-                go_straight(num_of_car);
-        else if(car_info[num_of_car][1]==car_info[num_of_car][0]+1||car_info[num_of_car][1]==car_info[num_of_car][0]-1)
-                turn_left(num_of_car);
-        else
-                turn_right(num_of_car);
-}
-void
-go_straight(int num_of_car)
-{
-        int i=0;
-        car_route[num_of_car][i]=car_info[num_of_car][0];
-        for(i=1;i<2;i++) {
-                if(car_route[num_of_car][i-1]-1==0)
-                        car_route[num_of_car][i-1]=4;
-                else
-                        car_route[num_of_car][i]=car_route[num_of_car][i-1]-1;
-        }
-        for(int j=0;j<NTHREADS;j++) {
-                car_route[j][i]=0;
-        }
-}
-void
-turn_right(int num_of_car)
-{
-        int i=0;
-        car_route[num_of_car][i]=car_info[num_of_car][0];
-        for(int j=0;j<NTHREADS;j++) {
-                car_route[j][i]=0;
-                car_route[j][i+1]=0;
-        }
-}
-void
-turn_left(int num_of_car)
-{
-        int i=0;
-        car_route[num_of_car][i]=car_info[num_of_car][0];
-        for(i=1;i<3;i++) {
-                if(car_route[num_of_car][i-1]-1==0)
-                        car_route[num_of_car][i]=4;
-                else
-                        car_route[num_of_car][i]=car_route[num_of_car][i-1]-1;
-        }
+	switch(point) {
+		case NORTH:
+			return "NORTH";
+		case EAST:
+			return " EAST";
+		case SOUTH:
+			return "SOUTH";
+		case WEST:
+			return " WEST";
+	}
+	return NULL;
 }
 
 
+/*
+ * Test code
+ */
+
+/* Initialize semaphores*/
 static
 void
 inititems(void)
@@ -214,6 +158,9 @@ semtestthread(void *junk, unsigned long num)
 {
 	int i;
 	(void)junk;
+	// Define start and end points of cars.
+	CardinalPoints start_point;
+	CardinalPoints end_point;
 
 	/*
 	 * Only one of these should print at a time.
