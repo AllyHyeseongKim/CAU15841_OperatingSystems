@@ -56,6 +56,8 @@ const char* getCardinalPoint(CardinalPoint);
 /* moving system */
 void pCardinalPoint(int);
 void vCardinalPoint(int);
+void pWaitPoint(int);
+void vWaitPoint(int);
 void goStraight(unsigned long, CardinalPoint, CardinalPoint);
 void turnRight(unsigned long, CardinalPoint, CardinalPoint);
 void turnLeft(unsigned long, CardinalPoint, CardinalPoint);

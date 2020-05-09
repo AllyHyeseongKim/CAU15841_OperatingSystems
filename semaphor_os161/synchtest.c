@@ -59,6 +59,10 @@ static struct semaphore *semNW;
 static struct semaphore *semNE;
 static struct semaphore *semSW;
 static struct semaphore *semSE;
+static struct semaphore *waitNW;
+static struct semaphore *waitNE;
+static struct semaphore *waitSW;
+static struct semaphore *waitSE;
 // Define the semaphore for printing messages.
 static struct semaphore *KPRINT;
 // Define the semaphore for moving cars.
@@ -66,7 +70,6 @@ static struct semaphore *POINT;
 // Define the global variable for counting the number fo cars above the intersection. (ex. 0: 1 car above the intersection)
 //int num_cars_intersection = -1;
 int return_controller = 32;
-
 /* Threads */
 typedef struct thread Thread;
 
@@ -137,13 +140,50 @@ vCardinalPoint(int cardinal_point)
 
         }
 }
+void
+pWaitPoint(int point)
+{
+	switch(point) {
+                case 4:
+                        P(waitNW);
+                        break;
+                case 5:
+                        P(waitNE);
+                        break;
+                case 6:
+                        P(waitSE);
+                        break;
+                case 7:
+                        P(waitSW);
+                        break;
+
+        }
+}
+void
+vWaitPoint(int point)
+{
+        switch(point) {
+                case 4:
+                        V(waitNW);
+                        break;
+                case 5:
+                        V(waitNE);
+                        break;
+                case 6:
+                        V(waitSE);
+                        break;
+                case 7:
+                        V(waitSW);
+                        break;
+
+        }
+}
 
 // Go Straight.
 void
 goStraight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)
 {
 	int route;
-
 	pCardinalPoint(start_point+4);
 //	P(KPRINT);
 //	kprintf("// %lu gets %s\n",car_num, getCardinalPoint(start_point+4));
@@ -317,12 +357,21 @@ turnLeft(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_poi
 void
 movingSystem(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)
 {
-	if (end_point==(start_point+2)||end_point==(start_point-2))
+	if (end_point==(start_point+2)||end_point==(start_point-2)) {
+		pWaitPoint(start_point+4);
 		goStraight(car_num, start_point, end_point);
-	else if (end_point==(start_point+3)||end_point==(start_point-1))
+		vWaitPoint(start_point+4);
+	}
+	else if (end_point==(start_point+3)||end_point==(start_point-1)) {
+		pWaitPoint(start_point+4);
 		turnRight(car_num, start_point, end_point);
-	else if (end_point==(start_point+1)||end_point==(start_point-3))
+		vWaitPoint(start_point+4);
+	}
+	else if (end_point==(start_point+1)||end_point==(start_point-3)) {
+		pWaitPoint(start_point+4);
 		turnLeft(car_num, start_point, end_point);
+		vWaitPoint(start_point+4);
+	}
 }
 
 
@@ -341,6 +390,10 @@ inititems(void)
 		semNE = sem_create("NE", 1);
 		semSW = sem_create("SW", 1);
 		semSE = sem_create("SE", 1);
+		waitNW = sem_create("WAITNW", 3);
+                waitNE = sem_create("WAITNE", 3);
+                waitSW = sem_create("WAITSW", 3);
+                waitSE = sem_create("WAITSE", 3);
 		KPRINT = sem_create("KPRINT", 1);
 		POINT = sem_create("POINT", 3);
 		if(POINT==NULL) {
@@ -378,6 +431,7 @@ static
 void
 semtestthread(void *cars, unsigned long car_num)
 {
+	P(donesem);
 	Thread *car = (Thread*)cars;
 
 	// Define start and end points of cars.
@@ -400,12 +454,12 @@ semtestthread(void *cars, unsigned long car_num)
 	movingSystem(car_num, start_point, end_point);
 	car[car_num].t_state = S_ZOMBIE;
 	
-	return_controller--;
+//	return_controller--;
 //	P(KPRINT);
 //        kprintf("***DONE Thread: %lu\n", car_num);
 //	V(KPRINT);
 //        V(KPRINT);
-//	V(donesem);
+	V(donesem);
 }
 
 int
@@ -419,6 +473,9 @@ semtest(int nargs, char **args)
 	inititems();
 	kprintf("Starting semaphore test...\n");
 	kprintf("If this hangs, it's broken: ");
+	for (i=0; i<NTHREADS; i++) {
+		V(donesem);
+	}
 	kprintf("ok\n");
 	kprintf("-----------------------------------------------------------------------------------------\n");
 	kprintf("-----------------------------------------------------------------------------------------\n");
@@ -435,12 +492,14 @@ semtest(int nargs, char **args)
 		}
 	}
 
-//	for (i=0; i<NTHREADS; i++) {
-//		V(testsem);	
-//		P(donesem);		
-//	}
+	for (i=0; i<NTHREADS; i++) {
+		V(donesem);			
+	}
+	for (i=0; i<NTHREADS*2; i++) {
+                P(donesem);             
+        }
 
-	while(return_controller>0);
+//	while(return_controller>0);
 
 	// Free threads
 	if (cars!=NULL) {
