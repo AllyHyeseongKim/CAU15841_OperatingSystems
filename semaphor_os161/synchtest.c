@@ -69,7 +69,7 @@ static struct semaphore *KPRINT;
 static struct semaphore *POINT;
 // Define the global variable for counting the number fo cars above the intersection. (ex. 0: 1 car above the intersection)
 //int num_cars_intersection = -1;
-int return_controller = 32;
+//int return_controller = 32;
 /* Threads */
 typedef struct thread Thread;
 
@@ -202,6 +202,8 @@ goStraight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_p
         if(route<4)
                 route = 7;
 	V(KPRINT);
+	
+	for (int i=0; i<100; i++);
 
 	pCardinalPoint(route);
 //	P(KPRINT);
@@ -216,7 +218,7 @@ goStraight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_p
         kprintf("[MOVE %s]     CAR NUMBER: %2lu| APPROACHING POINT: %s, TARGET POINT: %s (GO STRAIGHT)\n", getCardinalPoint(route), car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
 //	kprintf("// %d cars above the intersection.\n", num_cars_intersection+1);
 	V(KPRINT);
-	
+//	for (i=0; i<100; i++);
         // Print the exiting point of cars.
         P(KPRINT);
         kprintf("-----------------------------------------------------------------------------------------\n");
@@ -227,7 +229,7 @@ goStraight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_p
 //	kprintf("// %d cars above the intersection.\n", num_cars_intersection+1);
         kprintf("-----------------------------------------------------------------------------------------\n");
         V(KPRINT);
-
+	
 	V(POINT);
 //	P(KPRINT);
 //        kprintf("// %lu returns point/ resources remain: %d\n", car_num, POINT->sem_count);
@@ -242,6 +244,7 @@ goStraight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_p
 void
 turnRight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)
 {
+//	int i;
         pCardinalPoint(start_point+4);
 //	P(KPRINT);
 //        kprintf("// %lu gets %s\n",car_num, getCardinalPoint(start_point+4));
@@ -255,7 +258,7 @@ turnRight(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_po
 //	num_cars_intersection++;
 //	kprintf("// %d cars above the instersection.\n", num_cars_intersection+1);
         V(KPRINT);
-
+//	for (i=0; i<100; i++);
 	// Print the exiting point of cars.
         P(KPRINT);
         kprintf("-----------------------------------------------------------------------------------------\n");
@@ -299,6 +302,8 @@ turnLeft(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_poi
         if(route1<4)
                 route1 = 7;
         V(KPRINT);
+	
+	for (int i=0; i<100; i++);
 
         pCardinalPoint(route1);
 //	P(KPRINT);
@@ -318,6 +323,8 @@ turnLeft(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_poi
                 route2 = 7;
         V(KPRINT);
 
+//	for (i=0; i<100; i++);
+
         pCardinalPoint(route2);
 //	P(KPRINT);
 //        kprintf("// %lu gets %s\n",car_num, getCardinalPoint(route2));
@@ -331,7 +338,7 @@ turnLeft(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_poi
         kprintf("[MOVE %s]     CAR NUMBER: %2lu| APPROACHING POINT: %s, TARGET POINT: %s (TURN LEFT)\n", getCardinalPoint(route2), car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
 //	kprintf("// %d cars above the intersection.\n", num_cars_intersection+1);
         V(KPRINT);
-
+//	for (i=0; i<100; i++);
         // Print the exiting point of cars.
         P(KPRINT);
         kprintf("-----------------------------------------------------------------------------------------\n");
@@ -357,6 +364,7 @@ turnLeft(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_poi
 void
 movingSystem(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)
 {
+	int i;
 	pWaitPoint(start_point+4);
 	if (end_point==(start_point+2)||end_point==(start_point-2))
 		goStraight(car_num, start_point, end_point);
@@ -364,6 +372,7 @@ movingSystem(unsigned long car_num, CardinalPoint start_point, CardinalPoint end
 		turnRight(car_num, start_point, end_point);
 	else if (end_point==(start_point+1)||end_point==(start_point-3))
 		turnLeft(car_num, start_point, end_point);
+	for(i=0; i<5000; i++);
 	vWaitPoint(start_point+4);
 }
 
@@ -443,6 +452,9 @@ semtestthread(void *cars, unsigned long car_num)
 	kprintf("[APPROACHING] CAR NUMBER: %2lu| APPROACHING POINT: %s, TARGET POINT: %s\n", car_num, getCardinalPoint(start_point), getCardinalPoint(end_point));
 	kprintf("-----------------------------------------------------------------------------------------\n");
 	V(KPRINT);
+
+	for (int i=0; i<50; i++);
+
 	// Move the car with the moving system.
 	movingSystem(car_num, start_point, end_point);
 	car[car_num].t_state = S_ZOMBIE;
@@ -488,6 +500,9 @@ semtest(int nargs, char **args)
 	for (i=0; i<NTHREADS; i++) {
 		V(donesem);			
 	}
+	
+	for (i=0; i<NTHREADS*100000; i++);
+
 	for (i=0; i<NTHREADS*2; i++) {
                 P(donesem);             
         }
