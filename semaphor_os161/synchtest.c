@@ -357,21 +357,14 @@ turnLeft(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_poi
 void
 movingSystem(unsigned long car_num, CardinalPoint start_point, CardinalPoint end_point)
 {
-	if (end_point==(start_point+2)||end_point==(start_point-2)) {
-		pWaitPoint(start_point+4);
+	pWaitPoint(start_point+4);
+	if (end_point==(start_point+2)||end_point==(start_point-2))
 		goStraight(car_num, start_point, end_point);
-		vWaitPoint(start_point+4);
-	}
-	else if (end_point==(start_point+3)||end_point==(start_point-1)) {
-		pWaitPoint(start_point+4);
+	else if (end_point==(start_point+3)||end_point==(start_point-1))
 		turnRight(car_num, start_point, end_point);
-		vWaitPoint(start_point+4);
-	}
-	else if (end_point==(start_point+1)||end_point==(start_point-3)) {
-		pWaitPoint(start_point+4);
+	else if (end_point==(start_point+1)||end_point==(start_point-3))
 		turnLeft(car_num, start_point, end_point);
-		vWaitPoint(start_point+4);
-	}
+	vWaitPoint(start_point+4);
 }
 
 
@@ -390,10 +383,10 @@ inititems(void)
 		semNE = sem_create("NE", 1);
 		semSW = sem_create("SW", 1);
 		semSE = sem_create("SE", 1);
-		waitNW = sem_create("WAITNW", 3);
-                waitNE = sem_create("WAITNE", 3);
-                waitSW = sem_create("WAITSW", 3);
-                waitSE = sem_create("WAITSE", 3);
+		waitNW = sem_create("WAITNW", 2);
+                waitNE = sem_create("WAITNE", 2);
+                waitSW = sem_create("WAITSW", 2);
+                waitSE = sem_create("WAITSE", 2);
 		KPRINT = sem_create("KPRINT", 1);
 		POINT = sem_create("POINT", 3);
 		if(POINT==NULL) {
